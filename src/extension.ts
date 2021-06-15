@@ -138,15 +138,18 @@ function deleteRightCommand() {
 }
 
 function pasteCommand(args: { text: string, pasteOnNewLine: boolean }) {
-    if (configuration.paste) {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            if (getMode(editor) == EditorMode.OVERTYPE) {
-                // TODO: Make paste work with align
-                overtypeBeforePaste(editor, args.text, args.pasteOnNewLine);
-                return vscode.commands.executeCommand("default:paste", args);
-            }
+    const editor = vscode.window.activeTextEditor;
+    if (editor) {
+        if (getMode(editor) == EditorMode.OVERTYPE && configuration.paste) {
+            // TODO: Make paste work with align
+            overtypeBeforePaste(editor, args.text, args.pasteOnNewLine);
+            return vscode.commands.executeCommand("default:paste", args);
+        } else if (getMode(editor) == EditorMode.ALIGN && !args.pasteOnNewLine) {
+            alignBeforeType(editor,args.text,true);
+            return null;
+        } else {
+            return vscode.commands.executeCommand("default:paste", args);
         }
-    } else return vscode.commands.executeCommand("default:paste", args);
+    }
     return null;
 }

@@ -1,19 +1,5 @@
 import * as vscode from "vscode";
 
-function rawType(editor: vscode.TextEditor, text: string) {
-    return editor.edit((edit) => {
-        editor.selections = editor.selections.map((selection) => {
-            if (selection.isEmpty) {
-                edit.insert(selection.start,text);
-                return selection;
-            } else {
-                edit.replace(selection,text);
-                return new vscode.Selection(selection.end,selection.end);
-            }
-        });
-    },{undoStopBefore: false,undoStopAfter: false});
-}
-
 export function overtypeBeforeType(editor: vscode.TextEditor, text: string, undoStop: boolean) {
     // skip overtype behavior when enter is pressed
     if (text === "\r" || text === "\n" || text === "\r\n") {
