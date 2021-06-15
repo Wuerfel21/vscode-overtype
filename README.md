@@ -1,5 +1,8 @@
 # overtype for vscode
 _continuation fork of the project_  
+
+# TODO: update readme for align or whatever. Basically, if you read this, know that this is my cobbled together fork.
+
 [![Extension releases](https://img.shields.io/github/release/DrMerfy/vscode-overtype/all.svg)](https://github.com/DrMerfy/vscode-overtype/releases)
 [![Open VSX Registry](https://img.shields.io/open-vsx/v/drmerfy/overtype)](https://open-vsx.org/extension/DrMerfy/overtype)
 [![Visual Studio Marketplace](https://vsmarketplacebadge.apphb.com/version/DrMerfy.overtype.svg)](https://marketplace.visualstudio.com/items?itemName=DrMerfy.overtype)

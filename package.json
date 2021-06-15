@@ -1,9 +1,9 @@
 {
     "name": "overtype",
-    "version": "0.4.0",
-    "displayName": "Overtype",
-    "description": "Provides insert/overtype mode.",
-    "publisher": "DrMerfy",
+    "version": "0.4.1",
+    "displayName": "Overtype/Align",
+    "description": "Provides insert/overtype/align mode.",
+    "publisher": "irqsome",
     "categories": [
         "Other"
     ],
@@ -19,11 +19,9 @@
         "theme": "dark"
     },
     "license": "BSD-2-Clause",
-    "homepage": "https://github.com/DrMerfy/vscode-overtype",
-    "bugs": "https://github.com/DrMerfy/vscode-overtype/issues",
     "repository": {
         "type": "git",
-        "url": "https://github.com/DrMerfy/vscode-overtype"
+        "url": "https://github.com/Wuerfel_21/vscode-overtype"
     },
     "main": "./out/extension",
     "engines": {
