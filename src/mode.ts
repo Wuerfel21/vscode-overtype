@@ -2,11 +2,16 @@ import * as vscode from "vscode";
 
 import { configuration } from "./configuration";
 
-const defaultMode = false;
+export enum EditorMode {
+    INSERT,OVERTYPE,ALIGN
+}
+
+const defaultMode = EditorMode.INSERT;
+
 
 const state = {
     global: defaultMode,
-    perEditor: new WeakMap<vscode.TextEditor, boolean>(),
+    perEditor: new WeakMap<vscode.TextEditor, EditorMode>(),
 };
 
 export function getMode(textEditor: vscode.TextEditor) {
@@ -18,11 +23,29 @@ export function getMode(textEditor: vscode.TextEditor) {
         state.perEditor.set(textEditor, defaultMode);
     }
 
-    return <boolean> state.perEditor.get(textEditor);
+    return <EditorMode> state.perEditor.get(textEditor);
+}
+
+export function nextMode(oldMode: EditorMode) {
+    switch (oldMode) {
+    case EditorMode.INSERT: return EditorMode.OVERTYPE;
+    case EditorMode.OVERTYPE: return configuration.enableAlign ? EditorMode.ALIGN : EditorMode.INSERT;
+    case EditorMode.ALIGN: return EditorMode.INSERT;
+    default: return EditorMode.INSERT;
+    }
+}
+
+export function modeName(mode: EditorMode) {
+    switch (mode) {
+    case EditorMode.INSERT: return "Insert";
+    case EditorMode.OVERTYPE: return "Overtype";
+    case EditorMode.ALIGN: return "Align";
+    default: return "(ERROR)";
+    }
 }
 
 export function toggleMode(textEditor: vscode.TextEditor) {
-    let overtype = !getMode(textEditor);
+    let overtype = nextMode(getMode(textEditor));
 
     if (!configuration.perEditor) {
         state.global = overtype;
@@ -33,7 +56,7 @@ export function toggleMode(textEditor: vscode.TextEditor) {
     return overtype;
 }
 
-export function resetModes(mode: boolean | null, perEditor: boolean) {
+export function resetModes(mode: EditorMode | null, perEditor: boolean) {
     if (mode === null) { mode = defaultMode; }
 
     if (perEditor) {
@@ -44,12 +67,12 @@ export function resetModes(mode: boolean | null, perEditor: boolean) {
         // tracking: https://github.com/Microsoft/vscode/issues/15178
 
         state.global = defaultMode;
-        state.perEditor = state.perEditor = new WeakMap<vscode.TextEditor, boolean>();
+        state.perEditor = state.perEditor = new WeakMap<vscode.TextEditor, EditorMode>();
     } else {
         // when switching from per-editor to global, set the global mode to the
         // provided mode and reset all per-editor modes
 
         state.global = mode;
-        state.perEditor = state.perEditor = new WeakMap<vscode.TextEditor, boolean>();
+        state.perEditor = state.perEditor = new WeakMap<vscode.TextEditor, EditorMode>();
     }
 }

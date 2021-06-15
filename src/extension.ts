@@ -1,8 +1,8 @@
 import * as vscode from "vscode";
 
-import { overtypeBeforePaste, overtypeBeforeType } from "./behavior";
+import { alignBeforeType, alignDelete, overtypeBeforePaste, overtypeBeforeType } from "./behavior";
 import { configuration, reloadConfiguration } from "./configuration";
-import { getMode, resetModes, toggleMode } from "./mode";
+import { getMode, resetModes, toggleMode, EditorMode, modeName } from "./mode";
 import { createStatusBarItem, destroyStatusBarItem, updateStatusBarItem } from "./statusBarItem";
 
 // initialization //////////////////////////////////////////////////////////////
@@ -16,6 +16,9 @@ export function activate(context: vscode.ExtensionContext) {
 
         vscode.commands.registerCommand("type", typeCommand),
         vscode.commands.registerCommand("paste", pasteCommand),
+
+        vscode.commands.registerCommand("overtype.deleteLeft", deleteLeftCommand),
+        vscode.commands.registerCommand("overtype.deleteRight", deleteRightCommand),
 
         vscode.window.onDidChangeActiveTextEditor(activeTextEditorChanged),
 
@@ -41,11 +44,23 @@ function activeTextEditorChanged(textEditor?: vscode.TextEditor) {
     } else {
         const mode = getMode(textEditor);
         updateStatusBarItem(mode);
+        vscode.commands.executeCommand('setContext','overtype.mode',modeName(mode));
+
 
         // if in overtype mode, set the cursor to secondary style; otherwise, reset to default
-        textEditor.options.cursorStyle = mode
-            ? configuration.secondaryCursorStyle
-            : configuration.defaultCursorStyle;
+        let cursorStyle;
+        switch(mode) {
+        default:
+            cursorStyle = configuration.defaultCursorStyle;
+            break;
+        case EditorMode.OVERTYPE:
+            cursorStyle = configuration.secondaryCursorStyle;
+            break;
+        case EditorMode.ALIGN:
+            cursorStyle = configuration.ternaryCursorStyle;
+            break;
+        }
+        textEditor.options.cursorStyle = cursorStyle;
     }
 }
 
@@ -96,33 +111,42 @@ function onDidChangeConfiguration() {
     activeTextEditorChanged();
 }
 
-function shouldPerformOvertype() {
-    if (!vscode.window.activeTextEditor) { return false; }
-
+function typeCommand(args: { text: string }) {
     const editor = vscode.window.activeTextEditor;
-    const mode = getMode(editor);
-
-    return mode;
+    if (editor && getMode(editor) == EditorMode.OVERTYPE) {
+        overtypeBeforeType(editor, args.text, false);
+    } else if (editor && getMode(editor) == EditorMode.ALIGN) {
+        alignBeforeType(editor, args.text, false);
+    } else vscode.commands.executeCommand('default:type',args);
 }
 
-function typeCommand(args: { text: string }) {
-    if (shouldPerformOvertype()) {
-        const editor = vscode.window.activeTextEditor;
-        if (editor) {
-            overtypeBeforeType(editor, args.text);
-        }
-    }
 
-    return vscode.commands.executeCommand("default:type", args);
+function deleteLeftCommand() {
+    const editor = vscode.window.activeTextEditor;
+    if (editor && getMode(editor) == EditorMode.ALIGN) {
+        alignDelete(editor,false);
+        return null;
+    } else return vscode.commands.executeCommand("deleteLeft");
+}
+
+function deleteRightCommand() {
+    const editor = vscode.window.activeTextEditor;
+    if (editor && getMode(editor) == EditorMode.ALIGN) {
+        alignDelete(editor,true);
+        return null;
+    } else return vscode.commands.executeCommand("deleteRight");
 }
 
 function pasteCommand(args: { text: string, pasteOnNewLine: boolean }) {
-    if (configuration.paste && shouldPerformOvertype()) {
+    if (configuration.paste) {
         const editor = vscode.window.activeTextEditor;
         if (editor) {
-            overtypeBeforePaste(editor, args.text, args.pasteOnNewLine);
+            if (getMode(editor) == EditorMode.OVERTYPE) {
+                // TODO: Make paste work with align
+                overtypeBeforePaste(editor, args.text, args.pasteOnNewLine);
+                return vscode.commands.executeCommand("default:paste", args);
+            }
         }
-    }
-
-    return vscode.commands.executeCommand("default:paste", args);
+    } else return vscode.commands.executeCommand("default:paste", args);
+    return null;
 }

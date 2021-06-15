@@ -22,8 +22,11 @@ function loadConfiguration() {
         paste: overtypeConfiguration.get<boolean>("paste"),
         perEditor: overtypeConfiguration.get<boolean>("perEditor") ? true : false,
 
+        enableAlign: overtypeConfiguration.get<boolean>("enableAlign"),
+
         labelInsertMode: overtypeConfiguration.get<String>("labelInsertMode"),
         labelOvertypeMode: overtypeConfiguration.get<String>("labelOvertypeMode"),
+        labelAlignMode: overtypeConfiguration.get<String>("labelAlignMode"),
 
         // tslint:disable-next-line:object-literal-sort-keys
         defaultCursorStyle: (() => {
@@ -34,6 +37,12 @@ function loadConfiguration() {
         // Get the user defined cursor style for overtype mode
         secondaryCursorStyle: (() => {
             return stringToCursorStyle(overtypeConfiguration, "secondaryCursorStyle",
+             vscode.TextEditorCursorStyle.Line);
+        })(),
+
+        // Get the user defined cursor style for align mode
+        ternaryCursorStyle: (() => {
+            return stringToCursorStyle(overtypeConfiguration, "ternaryCursorStyle",
              vscode.TextEditorCursorStyle.Line);
         })(),
     };

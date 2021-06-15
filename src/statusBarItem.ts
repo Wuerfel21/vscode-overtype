@@ -1,6 +1,7 @@
 import * as vscode from "vscode";
 
 import { configuration } from "./configuration";
+import { EditorMode, modeName, nextMode } from "./mode";
 
 let statusBarItem: vscode.StatusBarItem | null;
 
@@ -23,7 +24,7 @@ export function destroyStatusBarItem() {
     statusBarItem = null;
 }
 
-export function updateStatusBarItem(overtype: boolean | null) {
+export function updateStatusBarItem(overtype: EditorMode | null) {
     if (statusBarItem == null) { return; }
 
     if (overtype === null) {
@@ -36,12 +37,18 @@ export function updateStatusBarItem(overtype: boolean | null) {
     
     let sbiText;
 
-    if (overtype) {
-        sbiText = configuration.labelOvertypeMode;
-        statusBarItem.tooltip = "Overtype Mode, click to change to Insert Mode";
-    } else {
+    statusBarItem.tooltip =  `${modeName(overtype)} Mode, click to change to ${modeName(nextMode(overtype))} Mode`;
+
+    switch(overtype) {
+    case EditorMode.INSERT:
         sbiText = configuration.labelInsertMode;
-        statusBarItem.tooltip = "Insert Mode, click to change to Overtype Mode";
+        break;
+    case EditorMode.OVERTYPE:
+        sbiText = configuration.labelOvertypeMode;
+        break;
+    case EditorMode.ALIGN:
+        sbiText = configuration.labelAlignMode;
+        break;
     }
     if (sbiText === undefined || sbiText == null) sbiText = "";
 
