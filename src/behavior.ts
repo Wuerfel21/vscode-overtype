@@ -89,8 +89,7 @@ export function alignBeforeType(editor: vscode.TextEditor, text: string, undoSto
             if (typeSel.isSingleLine) {
                 let typeSize = editor.document.offsetAt(typeSel.end) - editor.document.offsetAt(typeSel.start);
                 if (typeSize > 1) undoStop = true;
-                if (typeSize < text.length) {
-                    // remove spaces if possible
+                if (typeSize != text.length) {
                     let spaceDiff = text.length - typeSize;
                     let currWord = editor.document.getWordRangeAtPosition(typeSel.end,alignWordExpr);
                     if (!currWord) currWord = editor.document.getWordRangeAtPosition(typeSel.end.translate(0,+1),alignWordExpr)
@@ -102,14 +101,13 @@ export function alignBeforeType(editor: vscode.TextEditor, text: string, undoSto
                             spacesAfter = editor.document.getWordRangeAtPosition(typeSel.end,/ {2,}/);
                         }
                     }
-                    if (spacesAfter) {
+                    if (spacesAfter && typeSize < text.length) {
+                        // remove spaces if possible
                         let spaceCount = editor.document.offsetAt(spacesAfter.end) - editor.document.offsetAt(spacesAfter.start);
                         edit.delete(new vscode.Range(spacesAfter.end.translate(0,-Math.min(spaceDiff,spaceCount-1)),spacesAfter.end));
-                    }
-                } else if (typeSize > text.length) {
-                    // Insert some more spaces
-                    if (editor.document.getText(new vscode.Range(typeSel.end, typeSel.end.translate(0, +1))) === ' ' ) {
-                        edit.insert(typeSel.end.translate(0, +1),' '.repeat(typeSize-text.length));
+                    } else if (spacesAfter && typeSize > text.length) {
+                        // Add spaces
+                        edit.insert(spacesAfter.end,' '.repeat(typeSize-text.length));
                     }
                 }
             } else {
