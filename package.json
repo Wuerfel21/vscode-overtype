@@ -1,6 +1,6 @@
 {
     "name": "overtype",
-    "version": "0.4.1",
+    "version": "0.4.2",
     "displayName": "Overtype/Align",
     "description": "Provides insert/overtype/align mode.",
     "publisher": "irqsome",

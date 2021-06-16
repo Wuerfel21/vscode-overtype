@@ -75,6 +75,7 @@ export function alignBeforeType(editor: vscode.TextEditor, text: string, undoSto
     // skip overtype behavior when enter is pressed
     if (text === "\r" || text === "\n" || text === "\r\n") {
         vscode.commands.executeCommand("default:type", {text: text});
+        return;
     }
     if (text.indexOf(' ')!==-1) undoStop = true;
 
@@ -92,6 +93,7 @@ export function alignBeforeType(editor: vscode.TextEditor, text: string, undoSto
                     // remove spaces if possible
                     let spaceDiff = text.length - typeSize;
                     let currWord = editor.document.getWordRangeAtPosition(typeSel.end,alignWordExpr);
+                    if (!currWord) currWord = editor.document.getWordRangeAtPosition(typeSel.end.translate(0,+1),alignWordExpr)
                     let spacesAfter;
                     if (currWord && !currWord.end.isEqual(lineEndPosition)) {
                         spacesAfter = editor.document.getWordRangeAtPosition(currWord.end,/ {2,}/);
